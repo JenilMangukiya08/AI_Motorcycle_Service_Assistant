@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Motorcycle Service Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-base: #141414;
+            --bg-surface: #1e1e1e;
+            --bg-elevated: #282828;
+            --bg-input: #222222;
+            --amber: #f59e0b;
+            --amber-dim: #b45309;
+            --amber-glow: rgba(245, 158, 11, 0.18);
+            --user-bubble: #1d4ed8;
+            --user-bubble2: #1e40af;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666;
+            --border: rgba(255, 255, 255, 0.07);
+            --radius-bubble: 18px;
+            --radius-sm: 10px;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            background: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 24px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--amber);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .header-text h1 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.01em;
+        }
+
+        .header-text p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 1px;
+        }
+
+        .header-badge {
+            margin-left: auto;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--amber);
+            background: var(--amber-glow);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── CHAT AREA ── */
+        
+        .chat-container{
+            flex:1;
+            overflow-y:auto;
+            
+        }
+
+        .chat-content{
+            min-height:100%;
+            display:flex;
+            flex-direction:column;
+           
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 16px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            opacity: 0.4;
+        }
+
+        .empty-state h2 {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            max-width: 340px;
+            line-height: 1.6;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .suggestion-chip {
+            font-size: 12px;
+            padding: 7px 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-chip:hover {
+            border-color: var(--amber);
+            color: var(--amber);
+            background: var(--amber-glow);
+        }
+
+        /* ── MESSAGES ── */
+        .message-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
+            gap: 8px;
+            animation: fadeUp 0.25s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        /* avatar */
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .avatar.bot-avatar {
+            background: var(--amber);
+            color: #000;
+            font-size: 16px;
+        }
+
+        /* bubbles */
+        .bubble {
+            max-width: 72%;
+            padding: 13px 17px;
+            border-radius: var(--radius-bubble);
+            line-height: 1.65;
+            font-size: 14.5px;
+            word-break: break-word;
+        }
+
+        .user .bubble {
+            background: linear-gradient(135deg, var(--user-bubble), var(--user-bubble2));
+            color: #fff;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot .bubble {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border-bottom-left-radius: 5px;
+            border: 1px solid var(--border);
+        }
+
+        /* ── ANSWER TEXT ── */
+        .answer-text {
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+        }
+        .answer-text h1,
+        .answer-text h2,
+        .answer-text h3 {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .answer-text strong {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .answer-text ul{
+            margin:8px 0 18px 25px;
+        }
+
+        .answer-text li{
+            margin-bottom:8px;
+            line-height:1.6;
+        }
+
+        .answer-text{
+            line-height:1.7;
+        }
+
+        /* ── ANSWER BLOCKS (step text + inline image) ── */
+        .answer-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .answer-block {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--amber);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+        }
+
+        .answer-block.heading-block {
+            border: none;
+            border-left: 3px solid rgba(245, 158, 11, 0.3);
+            background: transparent;
+            margin-top: 20px;
+            margin-bottom: 4px;
+            padding: 4px 0 4px 14px;
+            border-radius: 0;
+        }
+
+        .answer-block.heading-block .answer-block-text {
+            font-weight: 700;
+            font-size: 15.5px;
+            color: var(--amber);
+            padding-left: 0;
+        }
+
+        .answer-block-text {
+            font-size: 14px;
+            line-height: 1.65;
+            color: var(--text-primary);
+            padding-left: 8px;
+        }
+
+        .answer-block-step {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            border-radius: 6px;
+            background: var(--amber-glow);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: var(--amber);
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+
+        .answer-block-image {
+            margin-top: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+        }
+
+        .answer-block-image img {
+            display: block;
+            width: 100%;
+            max-width: 360px;
+            height: auto;
+            margin: 0;
+        }
+
+        /* ── OTHER IMAGES SECTION ── */
+        .other-images-wrap {
+            margin-top: 14px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+        }
+
+        /* ── IMAGE inside bot bubble ── */
+        .response-image-wrap {
+            margin-top: 14px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+        }
+
+        .image-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--amber);
+            letter-spacing: 0.04em;
+        }
+
+        .image-label span {
+            font-size: 13px;
+        }
+
+        .response-image-wrap img {
+            display: block;
+            width: 100%;
+            max-width: 460px;
+            height: auto;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        /* ── SOURCES ── */
+        .sources {
+            margin-top: 12px;
+            padding: 10px 13px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 11.5px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+        }
+
+        .sources-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .source-item {
+            color: var(--text-secondary);
+            padding: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .source-item::before {
+            content: '';
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--amber);
+            flex-shrink: 0;
+        }
+
+        /* ── INPUT AREA ── */
+        .input-area{
+            position:sticky;
+            bottom:0;
+            width:100%;
+            background:#212121;
+            border-top:1px solid #333;
+            padding:12px;
+            z-index:100;
+        }
+
+        .input-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 860px;
+            margin: 0 auto;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 6px 6px 6px 18px;
+            transition: border-color 0.2s;
+        }
+
+        .input-form:focus-within {
+            border-color: rgba(245, 158, 11, 0.45);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.07);
+        }
+
+        .input-form input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14.5px;
+            font-family: 'Inter', sans-serif;
+            padding: 8px 0;
+        }
+
+        .input-form input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            background: var(--amber);
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #fbbf24;
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.45);
+            transform: scale(1.06);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .input-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 860px;
+            margin: 7px auto 0;
+            padding: 0 4px;
+        }
+
+        .input-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .clear-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            background: transparent;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .clear-btn:hover {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chat-image {
+            width: 140px;
+            height: auto;
+            border-radius: 8px;
+            cursor: pointer;
+            object-fit: contain;
+            transition: transform .2s;
+        }
+
+        .chat-image:hover {
+            transform: scale(1.05);
+        }
+
+        #bikeSelect{
+            background:#222;
+            color:white;
+            border:none;
+            outline:none;
+            padding:8px 12px;
+            border-radius:10px;
+            font-size:14px;
+        }
+        .latest-chat{
+    scroll-margin-top: 20px;
+}
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            .bubble {
+                max-width: 88%;
+                font-size: 14px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .chat-container {
+                padding: 16px 12px;
+            }
+            .spec{
+                font-weight:bold;
+                font-size:20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-icon">🔧</div>
+        <div class="header-text">
+            <h1>Motorcycle Service Assistant</h1>
+            <p>BSA Manual</p>
+        </div>
+        <div class="header-badge">● ONLINE</div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-content" id="chatMessages">
+
+        {% if not chats %}
+        <div class="empty-state">
+            <div class="empty-icon">🏍️</div>
+            <h2>Ready to assist</h2>
+            <p>Ask anything about the motorcycle service manual — specs, procedures, torque values, or request steps with diagrams.</p>
+            <div class="suggestions">
+                <div class="suggestion-chip" onclick="fillInput(this)">Throttle operation check</div>
+                <div class="suggestion-chip" onclick="fillInput(this)">Wheel nut torque spec</div>
+                <div class="suggestion-chip" onclick="fillInput(this)">Show front brake diagram</div>
+                <div class="suggestion-chip" onclick="fillInput(this)">Cylinder head removal steps with images</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% for chat in chats %}
+
+        <div class="message-group {% if forloop.last %}latest-chat{% endif %}">
+
+            <!-- USER -->
+           
+            {% if chat.question %}
+            <div class="message user">
+                <div class="bubble">{{ chat.question }}</div>
+            </div>
+            {% endif %}
+
+            <!-- BOT -->
+            <div class="message bot">
+                <div class="avatar bot-avatar">⚙</div>
+                <div class="bubble">
+
+                    {% if chat.answer_blocks %}
+                    <div class="answer-blocks">
+                        {% for block in chat.answer_blocks %}
+                        <div class="answer-block {% if not block.step %}heading-block{% endif %}">
+                            <div class="answer-block-text">
+                                {% if block.step %}<span class="answer-block-step">{{ block.step }}</span>{% endif %}
+                                {{ block.text }}
+                            </div>
+                            {% for img in block.images %}
+                            <div class="answer-block-image">
+                                <img src="{{ img }}" alt="Step diagram" class="chat-image" style="width:100%;max-width:360px;">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if chat.other_images %}
+                    <div class="other-images-wrap" style="margin-top:14px">
+                        <div class="image-label">
+                            <span>🖼</span> OTHER IMAGES
+                        </div>
+                        <div class="image-gallery" style="padding:10px 12px">
+                            {% for img in chat.other_images %}
+                            <img src="{{ img }}" alt="Manual diagram" class="chat-image">
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% elif chat.answer %}
+                    <div class="answer-text">{{ chat.answer|safe }}</div>
+                    {% endif %}
+
+                    {% if chat.images %}
+                    <div class="response-image-wrap" {% if chat.answer or chat.answer_blocks %}style="margin-top:14px" {% endif %}>
+
+                        <div class="image-label">
+                            <span>🖼</span> DIAGRAM / IMAGES
+                        </div>
+
+                        <div class="image-gallery">
+                            {% for img in chat.images %}
+                            <img src="{{ img }}" alt="Manual diagram" class="chat-image">
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    {% endif %}
+
+                    {% if not chat.answer and not chat.images and not chat.answer_blocks %}
+                    I couldn't find that information in the document.
+                    {% endif %}
+
+                    {% if chat.warning %}
+                    <div class="sources" style="margin-top:10px;color:var(--amber);">{{ chat.warning }}</div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+
+        {% endfor %}
+    </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+        <form method="POST" class="input-form" id="chatForm">
+            {% csrf_token %}
+            <select name="bike" id="bikeSelect">
+                <option value="" {% if not selected_bike %}selected{% endif %} disabled hidden>Select your bike</option>
+                <option value="Bantam" {% if selected_bike == "Bantam" %}selected{% endif %}>Bantam</option>
+                <option value="GoldStar" {% if selected_bike == "GoldStar" %}selected{% endif %}>Gold Star</option>
+                <option value="scrambler" {% if selected_bike == "scrambler" %}selected{% endif %}>Scrambler</option>
+            </select>
+            <input type="text" name="query" id="queryInput"
+                placeholder="Ask about specs, procedures, or steps with images…" autocomplete="off" required>
+            <button type="submit" class="send-btn" aria-label="Send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+            </button>
+        </form>
+        <div class="input-footer">
+            <span class="input-hint">Enter to send &nbsp;·&nbsp; Try "steps with images" for procedure diagrams from the manual</span>
+            <form method="POST" id="clearForm" style="margin:0">
+                {% csrf_token %}
+                <input type="hidden" name="clear" value="1">
+                <button type="submit" class="clear-btn" title="Clear chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" width="14" height="14">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14H6L5 6" />
+                        <path d="M10 11v6" />
+                        <path d="M14 11v6" />
+                        <path d="M9 6V4h6v2" />
+                    </svg>
+                    Clear chat
+                </button>
+            </form>
+        </div>
+    </div>
+
+    
+</body>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+    const chatContainer = document.getElementById("chatContainer");
+    const chatMessages = document.getElementById("chatMessages");
+    const chatForm = document.getElementById("chatForm");
+    const queryInput = document.getElementById("queryInput");
+
+    function scrollToBottom() {
+        if (chatContainer) {
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Scroll to bottom on initial load and handle manual scroll restoration
+    if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+    }
+
+    window.addEventListener("load", scrollToBottom);
+
+    // Scroll to bottom whenever an image loads inside the chat
+    chatContainer.addEventListener("load", (e) => {
+        if (e.target.tagName === "IMG") {
+            scrollToBottom();
+        }
+    }, true);
+
+    chatForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const query = queryInput.value.trim();
+        if (!query) return;
+
+        const formData = new FormData(chatForm);
+        queryInput.value = "";
+
+        // Add user message immediately
+        chatMessages.insertAdjacentHTML("beforeend", `
+            <div class="message-group">
+                <div class="message user">
+                    <div class="bubble">${query}</div>
+                </div>
+            </div>
+        `);
+        scrollToBottom();
+
+        try {
+            const response = await fetch("", {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                let botHtml = `
+                    <div class="message-group">
+                        <div class="message bot">
+                            <div class="avatar bot-avatar">⚙</div>
+                            <div class="bubble">
+                `;
+
+                if (data.answer_blocks && data.answer_blocks.length > 0) {
+                    botHtml += `<div class="answer-blocks">`;
+                    data.answer_blocks.forEach(block => {
+                        botHtml += `
+                            <div class="answer-block ${!block.step ? 'heading-block' : ''}">
+                                <div class="answer-block-text">
+                                    ${block.step ? `<span class="answer-block-step">${block.step}</span>` : ""}
+                                    ${block.text}
+                                </div>
+                        `;
+                        if (block.images) {
+                            block.images.forEach(img => {
+                                botHtml += `
+                                    <div class="answer-block-image">
+                                        <img src="${img}" alt="Step diagram" class="chat-image" style="width:100%;max-width:360px;">
+                                    </div>
+                                `;
+                            });
+                        }
+                        botHtml += `</div>`;
+                    });
+                    botHtml += `</div>`;
+
+                    if (data.other_images && data.other_images.length > 0) {
+                        botHtml += `
+                            <div class="other-images-wrap" style="margin-top:14px">
+                                <div class="image-label"><span>🖼</span> OTHER IMAGES</div>
+                                <div class="image-gallery" style="padding:10px 12px">
+                        `;
+                        data.other_images.forEach(img => {
+                            botHtml += `<img src="${img}" alt="Manual diagram" class="chat-image">`;
+                        });
+                        botHtml += `</div></div>`;
+                    }
+                } else if (data.answer) {
+                    botHtml += `<div class="answer-text">${data.answer}</div>`;
+                }
+
+                if (data.images && data.images.length > 0) {
+                    botHtml += `
+                        <div class="response-image-wrap" style="margin-top:14px">
+                            <div class="image-label"><span>🖼</span> DIAGRAM / IMAGES</div>
+                            <div class="image-gallery">
+                    `;
+                    data.images.forEach(img => {
+                        botHtml += `<img src="${img}" alt="Manual diagram" class="chat-image">`;
+                    });
+                    botHtml += `</div></div>`;
+                }
+
+                if (!data.answer && (!data.images || data.images.length === 0) && (!data.answer_blocks || data.answer_blocks.length === 0)) {
+                    botHtml += `I couldn't find that information in the document.`;
+                }
+
+                if (data.warning) {
+                    botHtml += `<div class="sources" style="margin-top:10px;color:var(--amber);">${data.warning}</div>`;
+                }
+
+                botHtml += `</div></div></div>`;
+                
+                chatMessages.insertAdjacentHTML("beforeend", botHtml);
+                scrollToBottom();
+            }
+        } catch (err) {
+            console.error("Fetch error:", err);
+            // Optional: fallback to normal form submission on error if needed
+        }
+    });
+
+    function fillInput(el) {
+        queryInput.value = el.textContent;
+        queryInput.focus();
+    }
+</script>
+
+</html>

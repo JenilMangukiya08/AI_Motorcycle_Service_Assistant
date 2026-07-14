@@ -1,0 +1,49 @@
+# Environment Variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+.venv/
+
+# Evaluation Reports
+*.csv
+
+# IDE
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Ignore manuals
+chatbot/manuals/**/*.pdf
+chatbot/manuals/**/*.PDF
+
+# Ignore generated vector databases
+vector_store/
+embeddings/
+
+#ignore images
+images/
+instr_images/
+
+# Vector Database
+*.faiss
+
+# Serialized Data
+*.pkl
+
+# Evaluation Reports
+*.csv
+
+# Logs
+*.log
+
+
+# Environment
+.env

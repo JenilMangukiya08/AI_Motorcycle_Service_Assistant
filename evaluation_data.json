@@ -1,0 +1,14 @@
+[
+  {
+    "question": "How to remove oil filter?",
+    "ground_truth": "Remove the oil filter holder assembly and pull out the oil filter element."
+  },
+  {
+    "question": "What are the sub parts of speedometer?",
+    "ground_truth": "Speedometer, mounting bracket, collar, screw and grommet."
+  },
+  {
+    "question": "What is swing arm troubleshooting?",
+    "ground_truth": "Check fasteners, inspect shock absorbers, check for damage and verify alignment."
+  }
+]
